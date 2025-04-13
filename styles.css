@@ -431,12 +431,24 @@ body {
 }
 
 .notification {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 50px;
-    background: rgba(0, 247, 255, 0.2);
-    border: 2px solid #00f7ff;
-    animation: fadeIn 0.5s ease-out;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 16px;
+    display: none;
+}
+
+.notification.success {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    border: 1px solid #4CAF50;
+}
+
+.notification.error {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+    border: 1px solid #f44336;
 }
 
 @keyframes fadeIn {

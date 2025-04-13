@@ -98,9 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateCountdown, 1000);
 
     // Initialize Supabase client
-    const supabaseUrl = 'YOUR_SUPABASE_URL';
-    const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseUrl = 'https://qgcvysvlcdothjbhtcfo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnY3Z5c3ZsY2RvdGhqYmh0Y2ZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1NzU3MjQsImV4cCI6MjA2MDE1MTcyNH0.GgxXvFUwThtkYXsDgGGik_ol4lM0o5kUnDFzvXGBr4E';
+    
+    // Create Supabase client
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // Get DOM elements
     const notifyBtn = document.getElementById('notifyBtn');
@@ -133,20 +135,36 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (name && email) {
             try {
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    throw new Error('Please enter a valid email address');
+                }
+
+                console.log('Attempting to insert data into Supabase...');
+                
                 // Insert data into Supabase
                 const { data, error } = await supabase
                     .from('subscribers')
                     .insert([
                         { name: name, email: email }
-                    ]);
+                    ])
+                    .select();
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    if (error.code === '23505') { // Unique violation
+                        throw new Error('This email is already registered');
+                    }
+                    throw error;
+                }
                 
-                console.log('Data inserted:', data);
+                console.log('Data successfully inserted:', data);
                 
                 // Show success message
                 notification.textContent = 'Thank you! We will notify you when we go live.';
                 notification.style.display = 'block';
+                notification.className = 'notification success';
                 
                 // Hide form
                 emailForm.style.display = 'none';
@@ -156,13 +174,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 emailInput.value = '';
             } catch (error) {
                 console.error('Error inserting data:', error);
-                notification.textContent = 'Sorry, there was an error. Please try again.';
+                notification.textContent = error.message || 'Sorry, there was an error. Please try again.';
                 notification.style.display = 'block';
+                notification.className = 'notification error';
             }
         } else {
             // Show error message
             notification.textContent = 'Please enter both name and email.';
             notification.style.display = 'block';
+            notification.className = 'notification error';
         }
     });
 }); 
